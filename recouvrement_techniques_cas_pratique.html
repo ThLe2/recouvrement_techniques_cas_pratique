@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cas pratique — deux appels de relance</title>
+<style>
+:root{--prune:#8C1E70;--prune-fonce:#5E1349;--prune-clair:#F4E6EE;--accent:#C77BAA;
+ --vert:#283C28;--gris:#3C3C3C;--gris-moyen:#8A7A85;--filet:#E8DCE5;--creme:#FAF6F8;
+ --ok:#2F7A4F;--ko:#B23B3B;--amb:#B5852A;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--creme);color:var(--gris);
+ font-family:"Nunito","Segoe UI",Helvetica,Arial,sans-serif;font-size:16px;line-height:1.62}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px 60px}
+header.bandeau{background:var(--prune-fonce);color:#fff;padding:18px 0;border-bottom:4px solid var(--accent)}
+header.bandeau .wrap{padding-bottom:0}
+.chapitre{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#EAD3E3}
+.chapitre span{color:var(--accent);margin:0 6px}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:27px;line-height:1.25;margin:8px 0 4px;color:#fff}
+.sous{color:#EAD3E3;font-size:14.5px;margin:0}
+h2{font-family:Georgia,"Times New Roman",serif;font-size:20px;color:var(--prune-fonce);
+ margin:34px 0 0;padding-bottom:8px;border-bottom:2px solid var(--filet)}
+h2 .num{color:var(--accent);margin-right:8px}
+h3{font-size:15px;color:var(--vert);margin:20px 0 8px;letter-spacing:.02em}
+.carte{background:#fff;border:1px solid var(--filet);border-radius:10px;padding:20px 22px;margin:18px 0;
+ box-shadow:0 1px 2px rgba(94,19,73,.05)}
+.enc{background:var(--prune-clair);border-left:5px solid var(--prune);padding:14px 18px;
+ border-radius:0 8px 8px 0;margin:18px 0;font-size:15.2px}
+.enc .t{display:block;font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;
+ font-weight:800;color:var(--prune-fonce);margin-bottom:6px}
+.enc.al{background:#FBF4F4;border-left-color:var(--ko)}.enc.al .t{color:var(--ko)}
+.enc.ci{background:#FCF8F0;border-left-color:var(--amb)}.enc.ci .t{color:#8A6418}
+.situ{background:#FCF9FB;border:1px dashed var(--filet);border-radius:8px;padding:16px 18px;margin:16px 0;font-size:15.2px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.duo>div{background:#fff;border:1px solid var(--filet);border-radius:9px;padding:15px 17px;font-size:14.8px}
+.duo .h{font-weight:800;color:var(--prune-fonce);margin-bottom:7px;font-size:14.5px}
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.tri>div{background:#fff;border:1px solid var(--filet);border-radius:9px;padding:14px 15px;font-size:14.3px}
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.quad>div{background:#fff;border:1px solid var(--filet);border-radius:9px;padding:12px 13px;font-size:13.6px}
+.quad .h{font-weight:800;color:var(--prune-fonce);margin-bottom:6px;font-size:13px;
+ text-transform:uppercase;letter-spacing:.04em}
+.tri .h{font-weight:800;color:var(--prune-fonce);margin-bottom:6px;font-size:13.5px;
+ text-transform:uppercase;letter-spacing:.05em}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.8px;background:#fff}
+th,td{border:1px solid var(--filet);padding:9px 12px;text-align:left}
+thead th{background:var(--prune-clair);color:var(--prune-fonce);font-size:13.5px}
+tbody th{font-weight:600;color:var(--gris)}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.tot td,tr.tot th{background:#FBF3F8;font-weight:800;color:var(--prune-fonce)}
+.dl{display:inline-flex;align-items:center;gap:9px;background:var(--prune);color:#fff;text-decoration:none;
+ padding:11px 20px;border-radius:8px;font-weight:700;font-size:15px;margin:20px 0 4px}
+.dl:hover{background:var(--prune-fonce)}
+ol.q{padding-left:0;list-style:none;counter-reset:q}
+ol.q>li{margin:16px 0;padding-left:38px;position:relative}
+ol.q>li::before{counter-increment:q;content:counter(q);position:absolute;left:0;top:1px;
+ width:26px;height:26px;border-radius:50%;background:var(--prune-clair);color:var(--prune-fonce);
+ font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+b,strong{color:var(--vert)}
+footer{text-align:center;font-size:12.5px;color:var(--gris-moyen);padding:26px 18px 12px;
+ border-top:1px solid var(--filet);margin-top:44px}
+@media(max-width:860px){.quad{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.duo,.tri,.quad{grid-template-columns:1fr}h1{font-size:22px}}
+@media print{body{background:#fff}.dl{display:none}header.bandeau{background:#5E1349 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+.chaine{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:16px 0}
+.chaine .ch{background:#fff;border:1px solid var(--filet);border-radius:20px;padding:6px 13px;font-size:13.8px;font-weight:700;color:var(--prune-fonce)}
+.chaine .ch:first-child{background:var(--prune-clair)}
+.chaine .ch:last-child{background:#FBF4F4;color:var(--ko);border-color:#EBCFCF}
+.chaine .fl{color:var(--accent);font-weight:800}
+.dial{margin:14px 0}
+.rep{display:grid;grid-template-columns:120px 1fr;gap:4px 14px;padding:10px 0;border-bottom:1px solid var(--filet)}
+.rep .qui{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--prune-fonce);padding-top:2px}
+.rep.cli .qui{color:var(--gris-moyen)}
+.rep .txt{font-size:15.2px}
+.rep.cli .txt{font-style:italic}
+.rep .com{grid-column:2;font-size:13.6px;background:#FCF8F0;border-left:4px solid var(--amb);padding:6px 11px;border-radius:0 6px 6px 0;color:#6B4E12}
+@media(max-width:640px){.rep{grid-template-columns:1fr}.rep .com{grid-column:1}}
+@media print{.rep,.enc,table,.tri{break-inside:avoid}h2{break-after:avoid}}
+
+textarea.redac{width:100%;min-height:340px;border:1px solid var(--filet);border-radius:8px;padding:12px 14px;font:inherit;font-size:15px;line-height:1.55;background:#fff;resize:vertical}
+textarea.redac:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+textarea.redac:disabled{background:#F6F1F4;color:#555}
+.cpt{font-size:12.8px;color:var(--gris-moyen);margin-top:4px}
+.cpt.ok{color:var(--ok)}
+.fmt{font-size:13.4px;color:var(--gris-moyen);margin:6px 0 8px}
+table.ae td.c{text-align:center;width:56px}
+table.ae input{transform:scale(1.15)}
+.barre{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:22px 0}
+.btn{background:var(--prune);color:#fff;border:0;border-radius:8px;padding:12px 22px;font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.btn:hover{background:var(--prune-fonce)}.btn:disabled{background:#C9B8C3;cursor:not-allowed}
+.btn.sec{background:#fff;color:var(--prune-fonce);border:1px solid var(--accent)}
+.note{font-family:Georgia,serif;font-size:42px;color:var(--prune-fonce);line-height:1}
+.note small{display:block;font-family:inherit;font-size:14px;color:var(--gris-moyen);margin-top:6px}
+.ko{color:var(--ko);font-weight:700}.okk{color:var(--ok);font-weight:700}
+#voile{position:fixed;inset:0;background:rgba(40,12,32,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:18px}
+#voile .boite{background:#fff;border-radius:12px;max-width:440px;width:100%;padding:26px 26px 22px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+#voile h3{margin:0 0 6px;color:var(--prune-fonce);font-family:Georgia,serif;font-size:20px}
+#voile label{display:block;font-size:13px;font-weight:700;color:var(--prune-fonce);margin:12px 0 4px}
+#voile input{width:100%;padding:10px 12px;border:1px solid var(--filet);border-radius:7px;font:inherit}
+#idErr{color:var(--ko);font-size:13px;min-height:18px;margin-top:8px}
+.bandeval{background:var(--prune-fonce);color:#fff;border-radius:8px;padding:10px 16px;font-size:14px;margin:18px 0 0}
+.bandeval b{color:#fff}
+</style></head>
+<body>
+<header class="bandeau"><div class="wrap">
+ <div class="chapitre">Recouvrement · Journée 1 <span>/</span> Techniques de recouvrement</div><h1>Cas pratique — deux appels de relance</h1><p class="sous">Rédigez les deux appels : vos répliques et celles du client · cas évalué · environ 60 min</p>
+</div></header>
+<div class="wrap">
+<div class="bandeval" id="bandeval">Cas pratique évalué — un seul essai · copier-coller désactivé</div>
+<div class="carte">
+<div class="enc "><span class="t">LE CONTEXTE</span>Vous êtes conseiller ou conseillère au service recouvrement. Deux dossiers vous attendent, chez deux entreprises du parcours. Situations fictives, à usage pédagogique.</div>
+<div class="enc ci"><span class="t">CE QUI EST ATTENDU</span>Pour chaque situation, rédigez le dialogue complet : <b>vos répliques et celles du client</b>, de la première à la dernière phrase. Appliquez le fil de l'appel en six temps : identifier et annoncer, faire exprimer, proposer le paiement immédiat, négocier dans votre délégation, obtenir un engagement précis, récapituler et annoncer l'e-mail de confirmation. Écoutez, reformulez, montrez de l'empathie — sans menace.</div>
+<div class="enc al"><span class="t">UN SEUL ESSAI</span>Le copier-coller est désactivé : rédigez directement dans les zones de texte. Une fois remis, le cas pratique ne peut plus être modifié. Un bilan se télécharge alors : il contient vos deux scripts et votre auto-évaluation, et il est destiné à votre formateur.</div>
+</div>
+<h2><span class="num">1 ·</span>Script 1 — Monsieur Burny (Néréis Assurances)</h2>
+<div class="carte">
+<div class="enc "><span class="t">LA SITUATION</span>Monsieur Burny est artisan plombier depuis quelques années. Avec la conjoncture, son chiffre d'affaires a nettement baissé. Il a un arriéré de 960 €, soit deux mois de cotisation pour sa responsabilité civile professionnelle et l'assurance de ses deux véhicules utilitaires. Vous lui avez écrit il y a trois jours ; il vous rappelle. Il vous fait part de ses difficultés, vous rassure sur son carnet de commandes et vous dit qu'il peut payer en deux ou trois fois.</div>
+<div class="enc ci"><span class="t">VOTRE DÉLÉGATION</span>Votre délégation chez Néréis : paiement immédiat d'abord ; jusqu'à 3 versements sur 90 jours au plus, le premier pouvant être différé de 30 jours au plus — vous décidez. Faute de paiement, la garantie peut être suspendue : vous l'en informez, sans menace.</div>
+<p class="fmt">Rédigez l'appel en entier, une réplique par ligne, en commençant chaque ligne par <b>Conseiller :</b> ou <b>Client :</b>. Vous inventez les réponses du client. 600 caractères au minimum.</p>
+<textarea class="redac" id="t_s1" spellcheck="true" placeholder="Conseiller : …&#10;Client : …"></textarea>
+<div class="cpt" id="cpt_s1"></div>
+</div><h2><span class="num">2 ·</span>Script 2 — Madame Pierrot (Volténa)</h2>
+<div class="carte">
+<div class="enc "><span class="t">LA SITUATION</span>Madame Pierrot tient un cinéma de quartier, client professionnel de Volténa pour l'électricité. Deux factures restent impayées, pour un total de 816 €. Sa trésorerie est au plus bas : la fréquentation a chuté ces derniers mois, mais une programmation spéciale est prévue pour les fêtes. Vous l'appelez.</div>
+<div class="enc ci"><span class="t">VOTRE DÉLÉGATION</span>Votre délégation chez Volténa : paiement immédiat d'abord ; report de la date limite de paiement jusqu'à 15 jours ; échéancier sans frais jusqu'à 6 mensualités — vous décidez.</div>
+<p class="fmt">Rédigez l'appel en entier, une réplique par ligne, en commençant chaque ligne par <b>Conseiller :</b> ou <b>Cliente :</b>. Vous inventez les réponses de la cliente. 600 caractères au minimum.</p>
+<textarea class="redac" id="t_s2" spellcheck="true" placeholder="Conseiller : …&#10;Cliente : …"></textarea>
+<div class="cpt" id="cpt_s2"></div>
+</div>
+<h2><span class="num">3 ·</span>Votre auto-évaluation</h2>
+<div class="carte">
+<p>Pour l'ensemble des deux appels, notez-vous de 1 à 4 sur chaque critère. Elle est transmise au formateur avec votre bilan.</p>
+<table class="ae"><thead><tr><th>Critère</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td>J'ai vérifié l'identité du client et annoncé l'objet de l'appel sans détour</td><td class="c"><input type="radio" name="ae0" value="1" aria-label="1"></td><td class="c"><input type="radio" name="ae0" value="2" aria-label="2"></td><td class="c"><input type="radio" name="ae0" value="3" aria-label="3"></td><td class="c"><input type="radio" name="ae0" value="4" aria-label="4"></td></tr><tr><td>J'ai fait exprimer sa situation par des questions ouvertes</td><td class="c"><input type="radio" name="ae1" value="1" aria-label="1"></td><td class="c"><input type="radio" name="ae1" value="2" aria-label="2"></td><td class="c"><input type="radio" name="ae1" value="3" aria-label="3"></td><td class="c"><input type="radio" name="ae1" value="4" aria-label="4"></td></tr><tr><td>J'ai montré de l'écoute et de l'empathie, et j'ai reformulé</td><td class="c"><input type="radio" name="ae2" value="1" aria-label="1"></td><td class="c"><input type="radio" name="ae2" value="2" aria-label="2"></td><td class="c"><input type="radio" name="ae2" value="3" aria-label="3"></td><td class="c"><input type="radio" name="ae2" value="4" aria-label="4"></td></tr><tr><td>J'ai proposé le paiement immédiat en premier</td><td class="c"><input type="radio" name="ae3" value="1" aria-label="1"></td><td class="c"><input type="radio" name="ae3" value="2" aria-label="2"></td><td class="c"><input type="radio" name="ae3" value="3" aria-label="3"></td><td class="c"><input type="radio" name="ae3" value="4" aria-label="4"></td></tr><tr><td>J'ai obtenu un engagement précis (montant, date, moyen) dans ma délégation</td><td class="c"><input type="radio" name="ae4" value="1" aria-label="1"></td><td class="c"><input type="radio" name="ae4" value="2" aria-label="2"></td><td class="c"><input type="radio" name="ae4" value="3" aria-label="3"></td><td class="c"><input type="radio" name="ae4" value="4" aria-label="4"></td></tr><tr><td>J'ai récapitulé, annoncé l'e-mail de confirmation et pris congé, sans menace</td><td class="c"><input type="radio" name="ae5" value="1" aria-label="1"></td><td class="c"><input type="radio" name="ae5" value="2" aria-label="2"></td><td class="c"><input type="radio" name="ae5" value="3" aria-label="3"></td><td class="c"><input type="radio" name="ae5" value="4" aria-label="4"></td></tr></tbody></table>
+<p style="font-size:13px;color:var(--gris-moyen)">1 = pas du tout · 2 = en partie · 3 = en grande partie · 4 = tout à fait</p>
+</div>
+<div class="barre"><button class="btn" id="valider" disabled>Remettre mon cas pratique</button><span id="etatBtn" style="font-size:13px;color:var(--gris-moyen)"></span></div>
+<div id="resultat"></div>
+<footer>TMK Performances - N° Siret : 49841924100027 - Code NAF : 8559A</footer>
+</div>
+<script>
+['copy','cut','paste','drop','contextmenu','dragstart'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&['c','x','v','u','s','p'].includes((e.key||'').toLowerCase())) e.preventDefault(); });
+const CP = {"code": "recouvrement_techniques_cas_pratique", "titre": "Cas pratique — deux appels de relance", "bandeau": "Recouvrement · Journée 1 · Techniques de recouvrement", "scripts": [{"id": "s1", "titre": "Script 1 — Monsieur Burny (Néréis Assurances)", "situation": "Monsieur Burny est artisan plombier depuis quelques années. Avec la conjoncture, son chiffre d'affaires a nettement baissé. Il a un arriéré de 960 €, soit deux mois de cotisation pour sa responsabilité civile professionnelle et l'assurance de ses deux véhicules utilitaires. Vous lui avez écrit il y a trois jours ; il vous rappelle. Il vous fait part de ses difficultés, vous rassure sur son carnet de commandes et vous dit qu'il peut payer en deux ou trois fois.", "criteres": [["Identification et objet de l'appel", ["monsieur burny", "m. burny", "titulaire", "numéro de contrat", "au sujet", "960", "cotisation"]], ["Faire exprimer la situation", ["?"]], ["Écoute, reformulation et empathie", ["je comprends", "si je comprends bien", "si je résume", "je vois", "c'est bien cela", "c'est bien ça", "difficile"]], ["Paiement immédiat proposé", ["aujourd'hui", "immédiatement", "dès maintenant", "tout de suite", "par carte"]], ["Solution et engagement précis", ["versements", "versement", "en trois fois", "en 3 fois", "en deux fois", "en 2 fois", "échéancier", "le 5", "le 10", "le 15"]], ["Récapitulatif et confirmation", ["je récapitule", "récapitul", "si je résume", "e-mail", "mail", "confirmation"]]]}, {"id": "s2", "titre": "Script 2 — Madame Pierrot (Volténa)", "situation": "Madame Pierrot tient un cinéma de quartier, client professionnel de Volténa pour l'électricité. Deux factures restent impayées, pour un total de 816 €. Sa trésorerie est au plus bas : la fréquentation a chuté ces derniers mois, mais une programmation spéciale est prévue pour les fêtes. Vous l'appelez.", "criteres": [["Identification et objet de l'appel", ["madame pierrot", "mme pierrot", "titulaire", "au sujet", "816", "factures"]], ["Faire exprimer la situation", ["?"]], ["Écoute, reformulation et empathie", ["je comprends", "si je comprends bien", "si je résume", "je vois", "c'est bien cela", "c'est bien ça", "difficile"]], ["Paiement immédiat proposé", ["aujourd'hui", "immédiatement", "dès maintenant", "tout de suite", "par carte"]], ["Solution et engagement précis", ["mensualités", "mensualité", "versements", "versement", "échéancier", "report", "en trois fois", "en 3 fois", "le 5", "le 10", "le 15"]], ["Récapitulatif et confirmation", ["je récapitule", "récapitul", "si je résume", "e-mail", "mail", "confirmation"]]]}], "autoeval": ["J'ai vérifié l'identité du client et annoncé l'objet de l'appel sans détour", "J'ai fait exprimer sa situation par des questions ouvertes", "J'ai montré de l'écoute et de l'empathie, et j'ai reformulé", "J'ai proposé le paiement immédiat en premier", "J'ai obtenu un engagement précis (montant, date, moyen) dans ma délégation", "J'ai récapitulé, annoncé l'e-mail de confirmation et pris congé, sans menace"], "modelesHtml": "<h3>Script 1 — Monsieur Burny</h3><div class=\"dial\"><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Service recouvrement des cotisations de Néréis Assurances, Thomas à votre écoute, bonjour.</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">Bonjour, Burny à l'appareil. J'ai reçu votre e-mail pour mes cotisations.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Merci de nous rappeler, Monsieur Burny. Pour retrouver votre dossier, pouvez-vous me donner votre numéro de contrat et votre date de naissance ?</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">Contrat 77 412, né le 14 juin 1984.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Merci. Je vois l'arriéré de 960 €, soit deux mois de cotisation pour votre responsabilité civile professionnelle et vos deux utilitaires. Que s'est-il passé ces derniers mois ?</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">Les chantiers ont fortement baissé. Mais j'ai des commandes signées pour janvier, ça va repartir. Je peux vous payer en deux ou trois fois.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Je comprends, une baisse d'activité pèse vite sur la trésorerie. Si je comprends bien, vos rentrées reprennent en janvier ?</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">C'est ça, les premiers chantiers sont payés mi-janvier.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Pouvez-vous régler une partie dès aujourd'hui, par carte bancaire ?</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">320 €, je peux.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Très bien. Je vous propose 320 € aujourd'hui par carte, puis 320 € le 15 janvier et 320 € le 15 février par prélèvement. Cela tient avec vos chantiers ?</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">Oui, c'est jouable.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Un point important : ces versements s'ajoutent à vos cotisations habituelles. Si l'un d'eux ne passait pas, la garantie de vos véhicules pourrait être suspendue — et vous ne seriez plus couvert en cas de sinistre. En cas de difficulté, appelez-moi avant la date.</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">Compris, je ferai attention.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Je récapitule : 320 € aujourd'hui par carte, 320 € le 15 janvier et 320 € le 15 février par prélèvement. C'est bien cela ?</span></div><div class=\"rep cli\"><span class=\"qui\">Client</span><span class=\"txt\">C'est bien ça.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseiller</span><span class=\"txt\">Je procède au paiement de 320 € avec vous, puis je vous envoie la confirmation par e-mail dans la foulée. Merci, Monsieur Burny, et bonne journée.</span></div></div><h3>Script 2 — Madame Pierrot</h3><div class=\"dial\"><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">Bonjour, Sarah, du service recouvrement de Volténa. Je suis bien en ligne avec Madame Pierrot, gérante du cinéma ?</span></div><div class=\"rep cli\"><span class=\"qui\">Cliente</span><span class=\"txt\">Oui, c'est moi.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">Je vous appelle au sujet de deux factures d'électricité restées impayées, pour un total de 816 €. Que se passe-t-il en ce moment pour vous ?</span></div><div class=\"rep cli\"><span class=\"qui\">Cliente</span><span class=\"txt\">La fréquentation a beaucoup baissé. Ma trésorerie est au plus bas, honnêtement je ne sais pas comment je vais payer.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">Je comprends, ce doit être une période difficile pour une salle de quartier. Vous voyez une amélioration se profiler ?</span></div><div class=\"rep cli\"><span class=\"qui\">Cliente</span><span class=\"txt\">Oui, j'ai une programmation spéciale pour les fêtes. Les recettes de décembre devraient être bonnes.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">Si je résume, la trésorerie est tendue aujourd'hui, mais les recettes reprennent à partir des fêtes. Pourriez-vous régler une partie dès aujourd'hui ?</span></div><div class=\"rep cli\"><span class=\"qui\">Cliente</span><span class=\"txt\">Non, vraiment, rien avant la fin du mois.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">D'accord. Je peux reporter la date de paiement de 15 jours, puis vous proposer un échéancier sans frais : trois mensualités de 272 €, le 10 décembre, le 10 janvier et le 10 février, par virement. Qu'en pensez-vous ?</span></div><div class=\"rep cli\"><span class=\"qui\">Cliente</span><span class=\"txt\">Le 10 décembre, c'est juste… Mais avec les fêtes, ça devrait aller, oui.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">Vous êtes sûre de pouvoir tenir le 10 décembre ? Je préfère un accord que vous pourrez respecter.</span></div><div class=\"rep cli\"><span class=\"qui\">Cliente</span><span class=\"txt\">Oui, c'est bon, je m'y engage.</span></div><div class=\"rep cons\"><span class=\"qui\">Conseillère</span><span class=\"txt\">Je récapitule : 272 € le 10 décembre, 272 € le 10 janvier et 272 € le 10 février, par virement. Si une difficulté se présente, contactez-moi avant la date. Je vous envoie la confirmation par e-mail tout de suite. Merci, Madame Pierrot, et bonne journée.</span></div></div>"};
+const MIN = 600;
+const CLE = 'tmk_' + CP.code;
+const IDENT = {actif:false, nom:'', prenom:''};
+function lms(){ const p=new URLSearchParams(location.search); return p.get('lms')==='1'||p.get('contexte')==='lms'; }
+function lireEtat(){ try{ return JSON.parse(localStorage.getItem(CLE)||'null'); }catch(e){ return null; } }
+function ecrireEtat(v){ try{ localStorage.setItem(CLE, JSON.stringify(v)); }catch(e){} }
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const norm = s => s.toLowerCase().replace(/[’`]/g,"'").replace(/\s+/g,' ');
+
+function ecranIdentite(){
+  if(lms()){ document.getElementById('bandeval').textContent='Cas pratique évalué — un seul essai.'; return; }
+  const v=document.createElement('div'); v.id='voile';
+  v.innerHTML='<div class="boite"><h3>Cas pratique évalué</h3><p style="font-size:14px;margin:0">Indiquez votre nom et votre prénom : ils figureront sur le bilan remis au formateur. <b>Un seul essai.</b></p>'
+   +'<label for="idNom">Nom</label><input id="idNom" autocomplete="family-name"><label for="idPrenom">Prénom</label><input id="idPrenom" autocomplete="given-name">'
+   +'<div id="idErr"></div><button class="btn" id="idOk" style="width:100%;margin-top:6px">Commencer</button></div>';
+  document.body.appendChild(v);
+  const ok=()=>{ const n=document.getElementById('idNom').value.trim(), p=document.getElementById('idPrenom').value.trim();
+    if(n.length<2||p.length<2){ document.getElementById('idErr').textContent='Renseignez votre nom et votre prénom.'; return; }
+    IDENT.actif=true; IDENT.nom=n.toUpperCase(); IDENT.prenom=p; v.remove();
+    document.getElementById('bandeval').innerHTML='Cas pratique évalué — <b>'+esc(p)+' '+esc(n.toUpperCase())+'</b> · un seul essai · copier-coller désactivé'; };
+  document.getElementById('idOk').addEventListener('click',ok);
+  v.addEventListener('keydown',e=>{ if(e.key==='Enter') ok(); });
+  document.getElementById('idNom').focus();
+}
+
+function compter(id){
+  const t=document.getElementById('t_'+id).value.trim(), c=document.getElementById('cpt_'+id);
+  c.textContent=t.length+' caractères'+(t.length<MIN?' — encore '+(MIN-t.length)+' au minimum':' — longueur suffisante');
+  c.className='cpt'+(t.length>=MIN?' ok':''); etat();
+}
+function etat(){
+  const okT=CP.scripts.every(s=>document.getElementById('t_'+s.id).value.trim().length>=MIN);
+  const okA=CP.autoeval.every((_,i)=>document.querySelector('input[name=ae'+i+']:checked'));
+  const b=document.getElementById('valider'); b.disabled=!(okT&&okA);
+  document.getElementById('etatBtn').textContent=b.disabled?'Rédigez les deux scripts ('+MIN+' caractères au minimum chacun) et complétez votre auto-évaluation.':'Vous pouvez remettre votre cas pratique. Un seul essai : vos réponses seront figées.';
+}
+function evaluer(s, texte){
+  const lignes=texte.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  const cons=lignes.filter(l=>!/^(client|cliente|mme|madame|m\.|monsieur)\b/i.test(l));
+  const tc=norm(cons.join(' ')), nbq=cons.filter(l=>l.includes('?')).length;
+  return s.criteres.map(([lib,mots])=>{
+    const ok = mots[0]==='?' ? nbq>=2 : mots.some(m=>tc.includes(norm(m)));
+    return {lib, ok};
+  });
+}
+function remettre(){
+  if(!confirm('Remettre votre cas pratique ? Un seul essai : vos réponses ne pourront plus être modifiées.')) return;
+  const textes={}, res={}; let pts=0;
+  CP.scripts.forEach(s=>{ textes[s.id]=document.getElementById('t_'+s.id).value.trim(); res[s.id]=evaluer(s,textes[s.id]); pts+=res[s.id].filter(r=>r.ok).length; });
+  const ae=CP.autoeval.map((_,i)=>+document.querySelector('input[name=ae'+i+']:checked').value);
+  const v={ident:{...IDENT}, textes, res, pts, ae, date:new Date().toISOString()};
+  ecrireEtat(v); afficher(v); bilan(v);
+}
+function figer(v){
+  CP.scripts.forEach(s=>{ const t=document.getElementById('t_'+s.id); t.value=v.textes[s.id]; t.disabled=true; compter(s.id); });
+  CP.autoeval.forEach((_,i)=>{ document.querySelectorAll('input[name=ae'+i+']').forEach(r=>{ r.checked=(+r.value===v.ae[i]); r.disabled=true; }); });
+  document.getElementById('valider').style.display='none';
+  document.getElementById('etatBtn').textContent='Cas pratique remis — réponses figées.';
+}
+function afficher(v){
+  figer(v);
+  const tot=CP.scripts.length*6;
+  let h='<h2><span class="num">·</span>Votre résultat</h2><div class="carte"><div class="note">'+v.pts+' / '+tot
+   +'<small>Note algorithmique indicative — elle repère des mots-clés dans vos répliques. La note finale est attribuée par le formateur, qui lit vos deux scripts.</small></div>';
+  CP.scripts.forEach(s=>{ h+='<h3>'+esc(s.titre)+'</h3><table><thead><tr><th>Critère</th><th>Repéré par l\'outil</th></tr></thead><tbody>'
+     + v.res[s.id].map(r=>'<tr><td>'+esc(r.lib)+'</td><td class="'+(r.ok?'okk':'ko')+'">'+(r.ok?'✓ oui':'✗ non repéré')+'</td></tr>').join('')+'</tbody></table>'; });
+  h+='<div class="barre"><button class="btn sec" id="retel">⬇ Télécharger à nouveau le bilan</button></div>'
+   +'<p style="font-size:13px;color:var(--gris-moyen);font-style:italic">Le bilan a été téléchargé à la remise. Transmettez-le à votre formateur selon ses consignes.</p></div>';
+  h+='<h2><span class="num">·</span>Deux scripts possibles</h2><div class="carte"><div class="enc ci"><span class="t">À LIRE APRÈS LA REMISE</span>Ces scripts ne sont pas « la » bonne réponse : ils montrent une façon de dérouler la méthode. Comparez-les aux vôtres, étape par étape.</div>'+CP.modelesHtml+'</div>';
+  const r=document.getElementById('resultat'); r.innerHTML=h;
+  document.getElementById('retel').addEventListener('click',()=>bilan(v));
+  r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function bilan(v){
+  const d=new Date(v.date), dd=d.toLocaleDateString('fr-FR')+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const tot=CP.scripts.length*6, nom=v.ident.actif?(v.ident.prenom+' '+v.ident.nom):'Stagiaire non identifié (contexte LMS)';
+  let doc='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Bilan — '+esc(CP.titre)+'</title><style>body{font-family:Helvetica,Arial,sans-serif;color:#3C3C3C;margin:0;background:#FAF6F8}'
+   +'header{background:#5E1349;color:#fff;padding:18px 0;border-bottom:4px solid #C77BAA}.w{max-width:860px;margin:0 auto;padding:0 18px}.k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#EAD3E3}'
+   +'h1{font-family:Georgia,serif;margin:6px 0}h2{font-family:Georgia,serif;color:#5E1349;border-bottom:2px solid #E8DCE5;padding-bottom:6px;margin-top:28px}'
+   +'table{width:100%;border-collapse:collapse;background:#fff;margin:10px 0}td,th{border:1px solid #E8DCE5;padding:7px 10px;text-align:left;font-size:14px}th{background:#F4E6EE;color:#5E1349}'
+   +'.sc{font-family:Georgia,serif;font-size:34px;color:#5E1349;margin:18px 0 4px}pre{white-space:pre-wrap;font-family:inherit;background:#fff;border:1px solid #E8DCE5;border-radius:8px;padding:12px 14px;font-size:14px}'
+   +'footer{text-align:center;font-size:12px;color:#8A7A85;padding:24px 0;border-top:1px solid #E8DCE5;margin-top:30px}</style></head><body>'
+   +'<header><div class="w"><div class="k">'+esc(CP.bandeau)+'</div><h1>Bilan — '+esc(CP.titre)+'</h1><div class="k">'+esc(nom)+' · remis le '+dd+'</div></div></header><div class="w">'
+   +'<div class="sc">'+v.pts+' / '+tot+'</div><p><i>Note algorithmique indicative (repérage de mots-clés). La note finale est attribuée par le formateur.</i></p>';
+  CP.scripts.forEach(s=>{ doc+='<h2>'+esc(s.titre)+'</h2><p><b>Situation.</b> '+esc(s.situation)+'</p><table><tr><th>Critère</th><th>Repéré par l\'outil</th></tr>'
+     +v.res[s.id].map(r=>'<tr><td>'+esc(r.lib)+'</td><td>'+(r.ok?'oui':'non repéré')+'</td></tr>').join('')+'</table><h3>Script rédigé par le stagiaire</h3><pre>'+esc(v.textes[s.id])+'</pre>'; });
+  doc+='<h2>Auto-évaluation du stagiaire</h2><table><tr><th>Critère</th><th>Note (1 à 4)</th></tr>'+CP.autoeval.map((c,i)=>'<tr><td>'+esc(c)+'</td><td>'+v.ae[i]+'</td></tr>').join('')+'</table>'
+   +'<p style="font-size:13px">1 = pas du tout · 2 = en partie · 3 = en grande partie · 4 = tout à fait</p><footer>TMK Performances - N° Siret : 49841924100027 - Code NAF : 8559A</footer></div></body></html>';
+  const b=new Blob([doc],{type:'text/html;charset=utf-8'}), a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='Bilan_'+CP.code+(v.ident.actif?'_'+v.ident.nom.replace(/[^A-Za-zÀ-ÿ-]/g,'')+'_'+v.ident.prenom.replace(/[^A-Za-zÀ-ÿ-]/g,''):'')+'_'+d.toISOString().slice(0,10)+'.html';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+CP.scripts.forEach(s=>document.getElementById('t_'+s.id).addEventListener('input',()=>compter(s.id)));
+document.querySelectorAll('table.ae input').forEach(r=>r.addEventListener('change',etat));
+document.getElementById('valider').addEventListener('click',remettre);
+const deja=lireEtat();
+if(deja){ Object.assign(IDENT,deja.ident); document.getElementById('bandeval').innerHTML='Cas pratique déjà remis'+(deja.ident.actif?' par <b>'+esc(deja.ident.prenom+' '+deja.ident.nom)+'</b>':'')+' — un seul essai.'; afficher(deja); }
+else { ecranIdentite(); CP.scripts.forEach(s=>compter(s.id)); etat(); }
+</script>
+</body></html>
